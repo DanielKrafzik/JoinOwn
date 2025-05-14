@@ -2,6 +2,7 @@ const BASE_URL = "https://join-3193b-default-rtdb.europe-west1.firebasedatabase.
 
 function init() {
     setTimeout(addDisplayToContent, 2500);
+    getData();
 }
 
 /**
