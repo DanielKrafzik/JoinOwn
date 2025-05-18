@@ -181,10 +181,6 @@ footer div span:hover {
   display: none !important;
 }
 
-.mw1920 {
-  max-width: 1920px;
-}
-
 .slide-out-tl {
   animation: slide-out-tl 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
    animation-delay: 1s;
