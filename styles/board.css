@@ -39,11 +39,9 @@ main {
 h1 {
     font-size: 48px;
 }
-
 .board-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     padding-left: 100px;
     padding-right: 100px;
     padding-top: 50px;
