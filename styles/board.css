@@ -115,6 +115,7 @@ h1 {
 
 .kanban-column {
     flex: 1;
+  padding: 20px;
 }
 
 .kanban-header {
