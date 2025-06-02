@@ -1,17 +1,24 @@
-header {
-    background-color: white;
-    width: 100%;
-    text-align: left;
+main {
+    flex-grow: 1;    
+    width: calc(100% - 232px);
+    margin-left: 232px;
+    padding-left: 100px;
+    padding-right: 100px;
+    padding-top: 100px;
 }
 
-header div {
-    margin-left: 300px;
+main h1 {
+    font-size: 48px;
 }
 
-main{
-    flex-grow: 1;
+.add-task-form {
     display: flex;
-    width: 100%;    
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+}
+
+.add-task-form-divider {
+    height: 100%;
+    width: 5px;
+    background-color: black;
 }
