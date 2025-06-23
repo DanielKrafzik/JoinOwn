@@ -1,33 +1,5 @@
-body {
-    display: flex;
-}
-header {
-    width: 100%;    
-    height: 100px;
-    width: calc(100% - 232px);    
-    margin-left: 232px;
-    display: flex;
-    align-items: center;
-    background-color: white;
-    box-shadow: 5px 1px 1px 5px #e4e2e2;
-}
-
-.header-and-icon {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.header-and-icon h2 {
-    padding-left: 150px;
-}
-
-.help-person-icon {
-    padding-right: 30px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+html {
+    overflow: hidden;
 }
 
 main {
@@ -39,9 +11,11 @@ main {
 h1 {
     font-size: 48px;
 }
+
 .board-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding-left: 100px;
     padding-right: 100px;
     padding-top: 50px;
@@ -105,10 +79,225 @@ h1 {
 .kanban-board {
   display: flex;
   gap: 20px;
-  padding: 20px;
+  padding: 20px 100px;
+}
+
+.kanban-column {
+    flex: 1;
 }
 
 .kanban-header {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.add-task-btn {
+    height: 22px;
+    width: 22px;
+    border: 1px solid black;
+    border-radius: 7px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.kanban-task {
+    background-color: white;
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0px 0px 10px lightgray;
+    cursor: pointer;
+}
+
+.no-tasks  {
+    background-color: rgb(231, 231, 231) !important;
+    border: 1px dashed rgb(184, 184, 184) !important;
+    color: rgb(184, 184, 184) !important;
+}
+
+.task-type {
+    margin-bottom: 24px;  
+    color: white;  
+    padding: 4px 8px;
+    border-radius: 5px;
+    display: inline-block;
+    width: auto;
+}
+
+.kanban-task h4 {
+    margin-bottom: 12px;;
+}
+
+.kanban-task p {
+    margin-bottom: 24px;
+    color: rgb(168, 168, 168);
+}
+
+.progress-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;    
+    margin-bottom: 24px;
+}
+
+.progress-bar {
+    background-color: lightgray;
+    height: 8px;
+    width: 124px;
+    border-radius: 5px;
+}
+
+.progress {
+    height: 100%;
+    background-color: rgb(69, 137, 255);
+    
+    border-radius: 5px;
+}
+
+.subtasks {
+    font-size: 14px;
+}
+
+.assigned-users {
+    display: flex;
+    justify-content: space-between;
+}
+
+.assigned-users div {
+    display: flex;
+}
+
+.user-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    border: 1px solid white;
+    color: white;
+    font-size: 12px;
+    margin-left: -8px;
+}
+
+/* individual background-colors */
+
+.user-story {
+    background-color: rgb(0, 56, 255);
+}
+
+.tech-task {    
+    background-color: rgb(31, 215, 193);
+}
+
+#drop-down-users-edit {
+    overflow-y: scroll;
+    min-height: 64px;
+    background-color: white;
+    margin-bottom: 16px;
+    border-radius: 0 0 5px 5px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+#drop-down-users-edit div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#drop-down-users-edit div span {
+    margin-left: 16px !important;
+}
+
+#drop-down-users-edit div p {
+    margin-bottom: 0 !important;
+    margin-left: 16px;
+}
+
+#drop-down-users-edit div:hover {
+    background-color: rgb(246, 247, 248);
+}
+
+#drop-down-users-edit div input {
+    margin-right: 16px;
+    cursor: pointer;
+}
+
+ #drop-down-users-input-board {
+    margin-bottom: 16px;
+}
+
+#drop-down-users-input-board:focus {
+    border: 1px solid rgb(93, 190, 231) !important;
+    outline: none;
+}
+
+#drop-down-users-board {
+    overflow-y: scroll;
+    background-color: white;
+    margin-top: -16px;
+    margin-bottom: 16px;
+    border-radius: 0 0 5px 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+#drop-down-users-board div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#drop-down-users-board div span {
+    margin-left: 16px !important;
+}
+
+#drop-down-users-board div p {
+    margin-bottom: 0 !important;
+    margin-left: 16px;
+}
+
+#drop-down-users-board div:hover {
+    background-color: rgb(246, 247, 248);
+}
+
+#drop-down-users-board div input {
+    margin-right: 16px;
+    cursor: pointer;
+}
+
+#drop-down-category-board {
+    background-color: white;
+    margin-top: -16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+}
+
+#drop-down-category-board button {
+    padding: 8px 16px;
+    margin-bottom: 0 !important;
+    cursor: pointer;
+    background-color: white;
+    border: none;
+    text-align: left;
+    font-size: 16px;
+}
+
+#drop-down-category-board button:hover {
+    background-color: rgb(246, 247, 248);
 }

@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Summary</title>
     <link rel="icon" type="image/x-icon" href="./assets/icon/fav-icon.svg" />
-    <link rel="stylesheet" href="summary.css" />
+    <link rel="stylesheet" href="./styles/summary.css" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="./styles/navigation.css" />
   </head>
-  <body onload="includeHTML()">
+  <body onload="summaryInit()">
     <div template="navigation.html"></div>
     <main>
       <header>
@@ -17,10 +17,11 @@
           <h2>Kanban Project Managment Tool</h2>
           <div class="help-person-icon">
             <a href="help.html"><img src="./assets/icon/help.svg" alt="" /></a>
-            <a href=""><img src="./assets/icon/person-icon.svg" alt="" /></a>
+            <div id="profile" class="profile"></div>
           </div>
         </div>
-
+      </header>
+      <article>
         <div class="title-main">
           <h1>Join 360</h1>
           <img src="./assets/icon/Vector 5.svg" alt="" />
@@ -115,12 +116,12 @@
               </div>
             </div>
           </div>
-          <div class="greeting">
-            <p>Good morning,</p>
-            <h2>Sofia Müller</h2>
+          <div id="greeting" class="greeting">
+            <p id="goodMorning"></p>
+            <h2 id="username"></h2>
           </div>
         </div>
-      </header>
+      </article>
     </main>
     <script src="script.js"></script>
   </body>
