@@ -6,8 +6,8 @@ let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser")) || {
   initals: "",
 };
 
-function init() {
-  includeHTML();
+async function init() {
+  await includeHTML();
   removeUserfromLocalStorage();
   setTimeout(addDisplayToContent, 2500);
   const logo = document.querySelector(".slide-out-tl");
@@ -16,9 +16,22 @@ function init() {
   });
 }
 
-function summaryInit() {
-  includeHTML();
+async function summaryInit() {
+  loadNavigation();
   greetUser();
+}
+
+async function boardInit() {
+  loadNavigation();
+  getTicketData();
+}
+
+async function addTaskInit() {
+  loadNavigation();
+}
+
+async function contactsInit() {
+  loadNavigation();
 }
 
 /**
@@ -47,6 +60,7 @@ async function getTicketData() {
     let response = await fetch(BASE_URL_TICKETS);
     let responseJson = await response.json();
     let tickets = Object.values(responseJson || {}).filter((ticket) => ticket !== null);
+    renderTickets(tickets);    
     return tickets;
   } catch (error) {
     console.log("error");
@@ -106,5 +120,25 @@ function greetUser() {
   } else {
     document.getElementById("goodMorning").innerText = "Good morning";
     document.getElementById("username").innerText = "";
+    document.getElementById("profile").innerText = "G";
   }
+}
+
+/**
+ * This function is responsible for the background-color change of the nav-item respective to the current page.
+ */
+function highlightPageInNav() {
+  let currentPage = location.pathname.split("/").pop();
+  document.querySelectorAll("a.nav-item").forEach((link) => {
+    let linkPage = link.getAttribute("href")?.replace("./", "");
+    link.classList.remove("active");
+    if (linkPage === currentPage) {
+      link.classList.add("active");
+    }
+  });
+}
+
+async function loadNavigation() {
+  await includeHTML();
+  highlightPageInNav();
 }
