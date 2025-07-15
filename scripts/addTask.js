@@ -33,11 +33,36 @@ async function dropDownUsers(id, renderId) {
     try {
         let response = await fetch(BASE_URL_USERS);
         let responseJson = await response.json();
-        console.log(responseJson);
+        changeDropDownArrow();
         iterateContacts(responseJson, id, renderId);
     } catch (error) {
         console.log("error");
     }
+}
+
+async function filterUsers(id, renderId) {
+    try {
+        let response = await fetch(BASE_URL_USERS);
+        let responseJson = await response.json();
+        iterateUsers(responseJson, id, renderId);
+    } catch (error) {
+        console.log("error");
+    }
+}
+
+function iterateUsers(users, dropDownId, renderId) {
+    let name;
+    let initials;
+    let id;
+    document.getElementById('drop-down-users').innerHTML = "";
+    users.forEach(user => {
+        if(user?.name.includes(document.getElementById("drop-down-users-input").value)) {
+            name = user?.name;
+            id= user?.id;
+            initials = name.split(" ").map(n => n[0]).join("").toUpperCase();
+            document.getElementById(dropDownId).innerHTML += userDropDownTemplate(name, initials, id, renderId); 
+        }  
+    });
 }
 
 async function iterateContacts(responseJson, id, renderId) {
@@ -58,6 +83,14 @@ async function iterateContacts(responseJson, id, renderId) {
         document.getElementById(id).innerHTML += userDropDownTemplate(name, initials, backgroundIndex, renderId);   
     }
 }
+
+function changeDropDownArrow() {
+    if(document.getElementById("drop-down-users-input-img").src.includes("arrow_down")) {
+        document.getElementById("drop-down-users-input-img").src = "./assets/imgs/arrow_up.png"
+    } else if (document.getElementById("drop-down-users-input-img").src.includes("arrow_up")) {
+        document.getElementById("drop-down-users-input-img").src = "./assets/imgs/arrow_down.png"
+    }
+};
 
 function checkRequiredInput(columnValue) {
     let hasError = false;
