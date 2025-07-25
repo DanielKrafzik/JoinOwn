@@ -2,10 +2,9 @@ let allTickets = [];
 const popup = document.getElementById("add-task-pop-up");
 const popuptask = document.getElementById("board-task-pop-up");
 const overlay = document.getElementById("board-overlay");
-
 let currentDraggedElement;
-console.log(currentDraggedElement);
 
+console.log(currentDraggedElement);
 
 let subtaskCount = 0;
 let subtaskWidth = 0;
@@ -69,7 +68,8 @@ async function renderTickets(tickets) {
       let assignedTo = t.assignedTo || [];
       let priority = t.priority || [];
       let subtasks = t.subtask || [];
-      
+      let ticketCounterId = t.id;
+
       calculateSubtaskCounter(subtasks);
 
       document.getElementById(columnId).innerHTML += await ticketTemplate(
@@ -80,37 +80,36 @@ async function renderTickets(tickets) {
         assignedTo,
         priority,
         index,
-        subtasks
-      );      
+        subtasks,
+        ticketCounterId
+      );
     renderSubtaskProgress(index, subtasks);
     }
-  };
-  console.log(allTickets);  
+  }
   toggleNoTaskContainer();
 }
 
 function startDragging(index) {
   currentDraggedElement = index;
-      toggleNoTaskContainer(columnId);
+  toggleNoTaskContainer();
 }
-
 
 function calculateSubtaskCounter(subtasks) {
   subtaskCount = 0;
   subtaskWidth = 0;
-  if(subtasks[0]) {
-    subtasks.forEach(ele => {
-      if(ele.checked) {
+  if (subtasks[0]) {
+    subtasks.forEach((ele) => {
+      if (ele.checked) {
         subtaskCount++;
-      }      
+      }
     });
-    subtaskWidth = subtaskCount / subtasks.length * 100;
+    subtaskWidth = (subtaskCount / subtasks.length) * 100;
   }
-};
+}
 
 function renderSubtaskProgress(index, subtasks) {
-  if(subtasks[0]) {       
-    document.getElementById(`p-subtask-${index}`).classList.remove("hide")  
+  if (subtasks[0]) {
+    document.getElementById(`p-subtask-${index}`).classList.remove("hide");
   }
 }
 
@@ -126,8 +125,12 @@ function moveTo(category) {
 
 function toggleNoTaskContainer() {
   let allTicketsToDo = allTickets.filter((obj) => obj.column == "To do");
-  let allTicketsProgress = allTickets.filter((obj) => obj.column == "In progress");
-  let allTicketsFeedback = allTickets.filter((obj) => obj.column == "Await feedback");
+  let allTicketsProgress = allTickets.filter(
+    (obj) => obj.column == "In progress"
+  );
+  let allTicketsFeedback = allTickets.filter(
+    (obj) => obj.column == "Await feedback"
+  );
   let allTicketsDone = allTickets.filter((obj) => obj.column == "done");
 
   if (allTicketsToDo.length == 0) {
@@ -174,28 +177,31 @@ async function renderTicketOverlay(ele) {
   try {
     let response = await fetch(BASE_URL_TICKETS);
     let responseJson = await response.json();
-    let tickets = Object.values(responseJson || {}).filter(
-      (ticket) => ticket !== null
-    );
+    let tickets = responseJson.ticket;
+    let result = Object.values(tickets);
+
     let index = ele.dataset.ticketindex;
     let mode = ele.dataset.mode;
-
-    defineTicketDetailVariables(tickets[0][index], mode, index);
+    let ticketCounterId = ele.dataset.ticketcounterid;
+    
+    defineTicketDetailVariables(result, mode, index, ticketCounterId);
   } catch (error) {
     console.log("error");
   }
 }
 
-async function defineTicketDetailVariables(ticket, mode, index) {
-  let category = ticket.category;
-  let categoryColor = ticket.category.toLowerCase().replace(" ", "-");
-  let title = ticket.title;
-  let description = ticket.description || [];
-  let date = ticket.date.split("-");
+async function defineTicketDetailVariables(ticket, mode, index, ticketCounterId) {
+  console.log(ticketCounterId);
+  
+  let category = ticket[index].category;
+  let categoryColor = ticket[index].category.toLowerCase().replace(" ", "-");
+  let title = ticket[index].title;
+  let description = ticket[index].description || [];
+  let date = ticket[index].date.split("-");
   let formattedDate = `${date[2]}/${date[1]}/${date[0]}`;
-  let priority = ticket.priority || "-";
-  let assignedTo = ticket.assignedTo || [];
-  let subtasks = ticket.subtask || [];
+  let priority = ticket[index].priority || "-";
+  let assignedTo = ticket[index].assignedTo || [];
+  let subtasks = ticket[index].subtask || [];
   if (mode === "view") {
     renderTicketDetails(
       category,
@@ -206,10 +212,13 @@ async function defineTicketDetailVariables(ticket, mode, index) {
       priority,
       assignedTo,
       subtasks,
-      index
+      index,
+      ticketCounterId
     );
   } else if (mode === "edit") {
-    editTicket(title, description, priority, assignedTo, subtasks, index, mode);
+    console.log(ticketCounterId);
+    
+    editTicket(title, description, priority, assignedTo, subtasks, index, mode, ticketCounterId);
   }
 }
 
@@ -218,6 +227,7 @@ function checkEditedValues(ele) {
   let title = "";
   let description = "";
   let date;
+  let ticketCounterId = ele.dataset.ticketcounterid;
   if (document.getElementById("task-title-edit").value) {
     title = document.getElementById("task-title-edit").value;
   }
@@ -228,7 +238,7 @@ function checkEditedValues(ele) {
     date = document.getElementById("task-date-edit").value;
   }
   ele.dataset.mode = "view";
-  takeOverEditedTicket(ele, index, title, description, date);
+  takeOverEditedTicket(ele, index, title, description, date, ticketCounterId);
 }
 
 function takeOverEditedTicket(
@@ -236,7 +246,8 @@ function takeOverEditedTicket(
   index,
   titleEdit,
   descriptionEdit,
-  dateEdit
+  dateEdit,
+  ticketCounterId
 ) {
   let editedTicket = {};
 
@@ -260,13 +271,13 @@ function takeOverEditedTicket(
     });
   });
   editedTicket.subtask = subtaskArray;
-  saveEditedTaskToFirebase(ele, index, editedTicket);
+  saveEditedTaskToFirebase(ele, index, editedTicket, ticketCounterId);
 }
 
-async function saveEditedTaskToFirebase(ele, index, ticketData) {
+async function saveEditedTaskToFirebase(ele, index, ticketData, ticketCounterId) {
   try {
     let response = await fetch(
-      `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${index}.json`
+      `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`
     );
     let ticket = await response.json();
     let updatedTicket = {
@@ -274,7 +285,7 @@ async function saveEditedTaskToFirebase(ele, index, ticketData) {
       ...ticketData,
     };
     await fetch(
-      `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${index}.json`,
+      `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`,
       {
         method: "PUT",
         headers: {
@@ -329,9 +340,9 @@ async function getUserDetails(user) {
   try {
     let response = await fetch(BASE_URL_USERS);
     let responseJson = await response.json();
-    let users = Object.values(responseJson || {}).filter(u => u !== null);
-    
-    let foundUser = users.find(u => u.name === user);
+    let users = Object.values(responseJson || {}).filter((u) => u !== null);
+
+    let foundUser = users.find((u) => u.name === user);
     return foundUser ? foundUser.id : 0;
   } catch (error) {
     console.error("error");

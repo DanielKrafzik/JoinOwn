@@ -36,7 +36,7 @@ async function dropDownUsers(id, renderId, imgId) {
         changeDropDownArrow(imgId);
         iterateContacts(responseJson, id, renderId);
     } catch (error) {
-        console.log("error");
+        console.log(error);
     }
 }
 
@@ -125,6 +125,14 @@ function checkRequiredInput(columnValue, validation) {
 
 async function createNewTicket(columnValue) {
     let selectedUsers = getSelectedUsers();
+    let counterResponse = await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticketCounter.json`);
+    let ticketCounter = await counterResponse.json();
+
+    if (ticketCounter === null) {
+      ticketCounter = 0;
+    }
+    ticketCounter++;
+
     let newTicket = {
         title: taskTitle.value,
         description: taskDescription.value,
@@ -134,9 +142,9 @@ async function createNewTicket(columnValue) {
         category: buttonCategory,
         subtask: subtaskArray,
         column: columnValue,
-        id: Date.now()
+        id: ticketCounter
     }
-    await saveTaskToFirebase(newTicket);
+    await saveTaskToFirebase(newTicket, ticketCounter);
 }
 
 function getSelectedUsers() {
@@ -226,16 +234,9 @@ function deleteSubtask(ele) {
     ele.parentElement.parentElement.remove();
 }
 
-async function saveTaskToFirebase(ticketData) {
+async function saveTaskToFirebase(ticketData, ticketCounter) {
   try {
-    let counterResponse = await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticketCounter.json`);
-    let ticketCounter = await counterResponse.json();
-
-    if (ticketCounter === null) {
-      ticketCounter = 0;
-    }
-    ticketCounter++;
-
+    
     await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounter}.json`, {
       method: "PUT",
       headers: {

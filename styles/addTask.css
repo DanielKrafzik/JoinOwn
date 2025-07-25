@@ -59,7 +59,7 @@ textarea {
 
 #task-title:focus,
 #task-description:focus,
-#task-date:focus {
+#task-date:focus{
   border: 1px solid rgb(93, 190, 231) !important;
   outline: none;
 }
