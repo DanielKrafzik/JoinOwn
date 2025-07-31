@@ -11,6 +11,8 @@ const addedUserfeedback = document.getElementById("added-userfeedback");
 let subtaskCounter = 0;
 let columnVal = 'To do';
 let ticketCounter = 0;
+let addTaskPopUp = document.getElementById("add-task-pop-up");
+let bordOverlay = document.getElementById("board-overlay");
 
 document.getElementById("create-task-button").onclick = function () {
     checkRequiredInput(columnVal, true);
@@ -76,23 +78,23 @@ async function dropDownUsers(id, renderId, imgId) {
  * @param {string} id - The ID of the DOM element where the contacts will be rendered.
  * @param {string} renderId - An identifier passed to the template function for rendering.
  */
-async function filterUsers(id, renderId) {
+async function filterUsers(id, renderId, inputId) {
     try {
         let response = await fetch(BASE_URL_USERS);
         let responseJson = await response.json();
-        iterateUsers(responseJson, id, renderId);
+        iterateUsers(responseJson, id, renderId, inputId);
     } catch (error) {
-        console.log("error");
+        console.log(error);
     }
 }
 
-function iterateUsers(users, dropDownId, renderId) {
+function iterateUsers(users, dropDownId, renderId, inputId) {
     let name;
     let initials;
     let id;
-    document.getElementById('drop-down-users').innerHTML = "";
+    document.getElementById(dropDownId).innerHTML = "";
     users.forEach(user => {
-        if(user?.name.toLowerCase().includes(document.getElementById("drop-down-users-input").value.toLowerCase())) {
+        if(user?.name.toLowerCase().includes(document.getElementById(inputId).value.toLowerCase())) {
             name = user?.name;
             id= user?.id;
             initials = name.split(" ").map(n => n[0]).join("").toUpperCase();
@@ -371,9 +373,16 @@ async function saveTaskToFirebase(ticketData, ticketCounter) {
     });
     addedUserfeedback.classList.remove("hide");
     addedUserfeedback.classList.add("show");
+    history.pushState(null, "");
+    getTicketData();
     setTimeout(() => {
-      window.location.href = "board.html";
-    }, 1000);
+    addedUserfeedback.classList.add("hide");
+    addedUserfeedback.classList.remove("show");    
+    }, 3000);
+    
+    addTaskPopUp.classList.add("hide");
+    bordOverlay.classList.add("hide");
+
   } catch (error) {
     console.error("Fehler beim Speichern:", error);
   }
@@ -381,6 +390,8 @@ async function saveTaskToFirebase(ticketData, ticketCounter) {
 
 function clearSubtaskValue() {
     document.getElementById("subtask").value = "";
+    document.getElementById("subtask-clear-button").classList.add("hide");
+    document.getElementById("subtask-button-div-divider").classList.add("hide");
 }
 
 function removeHideOnInput(inputElement) {
