@@ -151,7 +151,7 @@ async function renderTicketDetails(category, categoryColor, title, description, 
     </div>
     <div class="pop-up-margin-b-25 gap-10">
         <p>Priority:</p>
-        <span>${priority} <img src="${priority && priority !== '-' ? `./assets/icon/${priority}.svg` : ''}" alt=""></span>
+        <span>${priority.charAt(0).toUpperCase() + priority.slice(1)} <img src="${priority && priority !== '-' ? `./assets/icon/${priority}.svg` : ''}" alt=""></span>
     </div>
     <div class="pop-up-margin-b-25" id="assigned-users-div">
        ${userSpans}
@@ -224,7 +224,12 @@ async function editTicket (title, description, priority, assignedTo, subtasks, i
             <button class="priority-button set-priority" onclick="setPriority('low', this)">Low <img src="./assets/icon/green-arrows.svg" alt=""></button>
         </div>
         <p class="margin-top-24">Assigned to</p>
-        <input id="drop-down-users-input" class="drop-down-selection" placeholder="Select Contacts to assign" onclick="dropDownUsers('drop-down-users-edit', 'edit-render-user')">
+        <div id="drop-down-users-input-div">
+          <input id="drop-down-users-input" class="drop-down-selection" placeholder="Select Contacts to assign" oninput="filterUsers('drop-down-users-edit', 'edit-render-user', 'drop-down-users-input')" onclick="dropDownUsers('drop-down-users-edit', 'edit-render-user', 'drop-down-users-input-img-edit')">
+          <div id="drop-down-users-input-img-div"  onclick="dropDownUsers('drop-down-users-edit', 'edit-render-user', 'drop-down-users-input-img-edit')">
+                <img src="./assets/imgs/arrow_down.png" id="drop-down-users-input-img-edit" alt="">
+              </div>
+        </div>
         <div id="drop-down-users-edit" class="hide">
         </div>
         <div id="edit-render-user">${userSpans}</div>
