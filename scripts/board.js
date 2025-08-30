@@ -8,7 +8,6 @@ const month = currentDate.getMonth() + 1;
 const day = currentDate.getDate();
 const today = `${year}-${month.length === 2 ? month : "0" + month}-${day}`;
 
-
 let subtaskCount = 0;
 let subtaskWidth = 0;
 let subtaskEditArray = [];
@@ -20,8 +19,7 @@ let dataMode;
 /**
  * function to open/close the addTask pop-up
  */
-function popUpAddTask(ele, columnV) {
-  columnVal = columnV;
+function popUpAddTask(ele) {
   const isHidden = ele.classList.contains("hide");
   if (
     document.getElementById("board-task-information").className === "hide" &&
@@ -121,6 +119,38 @@ async function renderTickets(tickets) {
     }
   }
   toggleNoTaskContainer();
+}
+
+/**
+ * Generates an HTML snippet for a ticket , rendering assigned user icons concurrently.
+ *
+ * @async
+ * @param {string} title - The ticket's title.
+ * @param {string} description - A brief description of the ticket.
+ * @param {string} category - The category or type of the ticket.
+ * @param {string} categoryCss - CSS class suffix to style the category badge.
+ * @param {string[]} assignedTo - Array of user full names assigned to the ticket.
+ * @param {string} priority - Priority level (e.g. "low", "medium", "high").
+ * @param {number} index - Zero‑based index of the ticket in a list.
+ * @param {Array<object>} subtasks - An array of subtask objects, each with its own properties.
+ * @returns {Promise<string[]>} A promise that resolves to an array of HTML `<span>` strings containing rendered user icons.
+ *
+ */
+async function ticketTemplate(title, description, category, categoryCss, assignedTo, priority, index, subtasks, ticketCounterId) {
+  let userSpansArray = await Promise.all(
+    assignedTo.map(async (user, i) => {
+      let renderedUserBgIndex = await getUserDetails(user);
+      let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
+      let initials = user
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+      return `<span class="user-icon-rendered User-bc-${safeIndex}">${initials}</span>`;
+    })
+  );
+  let userSpans = userSpansArray.join("");
+  return getTicketTemplate(index, title, description, category, categoryCss, priority, subtasks, ticketCounterId, userSpans);
 }
 
 /**
@@ -297,27 +327,138 @@ async function defineTicketDetailVariables(ticket, mode, index, ticketCounterId)
   let categoryColor = ticket[index].category.toLowerCase().replace(" ", "-");
   let title = ticket[index].title;
   let description = ticket[index].description || [];
+  let dateForEditOverlay = ticket[index].date;
   let date = ticket[index].date.split("-");
   let formattedDate = `${date[2]}/${date[1]}/${date[0]}`;
   let priority = ticket[index].priority || "-";
   let assignedTo = ticket[index].assignedTo || [];
   let subtasks = ticket[index].subtask || [];
   if (mode === "view") {
-    renderTicketDetails(
-      category,
-      categoryColor,
-      title,
-      description,
-      formattedDate,
-      priority,
-      assignedTo,
-      subtasks,
-      index,
-      ticketCounterId
-    );
+    renderTicketDetails(category, categoryColor, title, description, formattedDate, priority, assignedTo, subtasks, index, ticketCounterId);
   } else if (mode === "edit") {
-    editTicket(title, description, priority, assignedTo, subtasks, index, mode, ticketCounterId);
+    editTicket(title, description, dateForEditOverlay, priority, assignedTo, subtasks, index, mode, ticketCounterId);
   }
+}
+
+/**
+ * Generates an array of HTML `<span>` snippets representing users assigned to a ticket in edit mode.
+ * Fetches user-specific styling information concurrently and renders each user's initials with styling.
+ *
+ * @async
+ * @param {string} title - The ticket title.
+ * @param {string} description - A description of the ticket.
+ * @param {string} priority - Priority level (e.g. "low", "medium", "high").
+ * @param {string[]} assignedTo - Array of full names of users assigned to the ticket.
+ * @param {Array<object>} subtasks - Array of subtask objects related to the ticket.
+ * @param {number} index - Zero-based index of the ticket in the list or UI.
+ * @param {string} mode - Mode identifier indicating how the ticket is being edited.
+ * @returns {Promise<string[]>} A promise resolving to an array of `<span>` HTML strings,
+ * each showing a user's initials, styled dynamically, and with a data-name attribute.
+ * @throws {Error} If any call to `getUserDetails(user)` fails.
+ */
+async function editTicket(title, description, dateForEditOverlay, priority, assignedTo, subtasks, index, mode, ticketCounterId) {
+  let userSpansArray = await Promise.all(
+    assignedTo.map(async (user, i) => {
+      let renderedUserBgIndex = await getUserDetails(user);
+      let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
+      let initials = user
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+      return getEditTicketUserSpansArrayTemplate(user, safeIndex, initials);
+    })
+  );
+  let userSpans = userSpansArray.join("");
+  let subtaskEle = subtasks
+    .map((subtask, i) => {
+      return getEditTicketSubtaskEleTemplate(subtask, i, dataTicketIndex, dataTicketCounterId, dataMode);
+    })
+    .join("");
+  subtaskEditArray = [];
+  subtasks.forEach((subtask) => subtaskEditArray.push(subtask.text));
+  document.getElementById("subtask-render-div").innerHTML = "";
+  document.getElementById("board-task-edit").innerHTML = getEditTicketTemplate(
+    title,
+    description,
+    dateForEditOverlay,
+    userSpans,
+    subtaskEle,
+    index,
+    ticketCounterId,
+    mode
+  );
+  document.querySelectorAll(".set-priority").forEach((ele) => {
+    if (ele.innerText.toLowerCase().trim() === priority) {
+      ele.classList.add(priority);
+      buttonPriority = priority;
+    } else {
+      ele.classList.remove(ele.innerText.toLowerCase().trim());
+    }
+  });
+}
+
+/**
+ * Builds and returns an array of HTML snippets representing assigned users for a ticket detail view.
+ * Each user is rendered with an icon (initials) styled dynamically based on user-specific details.
+ *
+ * @async
+ * @param {string} category - The ticket's category or type.
+ * @param {string} categoryColor - CSS class or color indicator for styling the category.
+ * @param {string} title - Title of the ticket.
+ * @param {string} description - Description text for the ticket.
+ * @param {string|Date} date - Date associated with ticket (e.g. creation or due date).
+ * @param {string} priority - Priority level (e.g. "low", "medium", "high").
+ * @param {string[]} assignedTo - Array of full names of users assigned to the ticket.
+ * @param {Array<object>} subtasks - Array of subtask objects related to the ticket.
+ * @param {number} index - Zero-based index of the ticket in a list or collection.
+ * @returns {Promise<string[]>} Promise resolving to an array of HTML `<div>` strings,
+ * each containing user initials and name inside styled elements.
+ * @throws {Error} If fetching details via `getUserDetails(user)` fails for any user.
+ */
+async function renderTicketDetails(
+  category,
+  categoryColor,
+  title,
+  description,
+  date,
+  priority,
+  assignedTo,
+  subtasks,
+  index,
+  ticketCounterId
+) {
+  let userSpansArray = await Promise.all(
+    assignedTo.map(async (user, i) => {
+      let renderedUserBgIndex = await getUserDetails(user);
+      let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
+      let initials = user
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+      return getRenderTicketDetailsUserSpansArrayTemplate(safeIndex, initials, user);
+    })
+  );
+  let userSpans = userSpansArray.join("");
+  let subtaskEle = subtasks
+    .map((subtask, i) => {
+      return getRenderTicketDetailsSubtaskEleTemplate(i, subtask, index, ticketCounterId);
+    })
+    .join("");
+
+  document.getElementById("board-task-information").innerHTML = getRenderTicketDetailsTemplate(
+    category,
+    categoryColor,
+    title,
+    description,
+    date,
+    priority,
+    index,
+    ticketCounterId,
+    userSpans,
+    subtaskEle
+  );
 }
 
 /**
@@ -405,9 +546,7 @@ function takeOverEditedTicket(ele, index, titleEdit, descriptionEdit, dateEdit, 
  */
 async function saveEditedTaskToFirebase(ele, index, ticketData, ticketCounterId) {
   try {
-    let response = await fetch(
-      `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`
-    );
+    let response = await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`);
     let ticket = await response.json();
     let updatedTicket = {
       ...ticket,
@@ -460,7 +599,6 @@ function addNewSubtask() {
 async function spliceEditSubArray(ele) {
   if (subtaskEditArray.length > 0) {
     subtaskEditArray.splice(ele.dataset.index, 1);
-    console.log(ele.dataset.ticketcounterid);
     await checkEditedValues(ele);
     renderTicketOverlay(ele);
   }

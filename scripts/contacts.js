@@ -6,18 +6,6 @@ const name = document.getElementById("contactName");
 const email = document.getElementById("contactEmail");
 const phone = document.getElementById("contactPhone");
 
-/**
- * Initializes the current user by fetching user data and finding the logged-in user
- */
-const initializeCurrentUser = async () => {
-  if (!currentUser) {
-    currentUser = Object.entries(await (await fetch(BASE_URL_USERS)).json())
-      .map(([id, user]) => ({ id, ...user }))
-      .find((user) => user.name === loggedInUser.username);
-  }
-  return currentUser;
-};
-
 const cacheFirebaseKeys = () => {
   contacts.forEach((contact) => {
     if (contact.firebaseKey) {
@@ -35,7 +23,7 @@ const showContacts = async () => {
   cacheFirebaseKeys();
   contacts.sort((a, b) => a.name.localeCompare(b.name));
   let sortedContacts = {};
-  contacts.forEach((contact) => {
+  contacts.forEach(async (contact) => {
     sortContactByInitials(contact, sortedContacts);
   });
   let contactsRef = document.getElementById("contacts");
@@ -71,7 +59,9 @@ const renderContacts = (sortedContacts, contactsRef) => {
       let userName = escapeQuotes(contact.name);
       let email = escapeQuotes(contact.email);
       let phone = escapeQuotes(contact.phone);
-      contactsRef.innerHTML += getContactTemplate(initials, userName, email, phone);
+      let safeIndex = contact.firebaseKey;
+      let contactIconId = ((safeIndex - 1) % 15) + 1;
+      contactsRef.innerHTML += getContactTemplate(initials, userName, email, phone, contactIconId, contact);
     });
   });
 };
@@ -84,7 +74,7 @@ const renderContacts = (sortedContacts, contactsRef) => {
  * @param {string} phone - The contact's phone number.
  * @param {HTMLElement} clickedElement - The clicked contact element.
  */
-const showContactsDetails = (initials, userName, email, phone, clickedElement) => {
+const showContactsDetails = (initials, userName, email, phone, contactIconId, clickedElement) => {
   document.querySelectorAll(".contact").forEach((contact) => {
     contact.classList.remove("active");
   });
@@ -96,7 +86,7 @@ const showContactsDetails = (initials, userName, email, phone, clickedElement) =
   initialsElement.classList.add("active");
   const contactDetailsRef = document.getElementById("contactDetails");
   contactDetailsRef.innerHTML = "";
-  contactDetailsRef.innerHTML = getContactDetailsTemplate(initials, userName, email, phone);
+  contactDetailsRef.innerHTML = getContactDetailsTemplate(initials, userName, email, phone, contactIconId);
   contactDetailsRef.classList.add("active");
 };
 
@@ -194,30 +184,29 @@ document.querySelector(".add-contact-button").addEventListener("click", (event) 
 
 /**
  * Adds a new contact to the database using values from input fields.
- * Validates that all fields (name, email, phone) are filled.
+ * Validates that all fields (name, email, phone) are filled and that the name
+ * contains both first name and surname.
  * If valid, creates a new contact object and saves it to the database,
  * updates the contact list, closes the add contact overlay, and clears the form.
- * Alerts the user if any field is missing.
+ * Alerts the user if any field is missing or name format is invalid.
  *
  * @async
  * @function addContactToDatabase
  * @returns {Promise<void>}
  */
 const addContactToDatabase = async () => {
-  if (!name.value || !email.value || !phone.value) {
-    alert("Bitte fülle alle Felder aus.");
-    return;
-  }
-  let newContact = {
-    name: name.value,
-    email: email.value,
-    phone: phone.value,
-  };
+  const nameValue = name.value;
+  const emailValue = email.value;
+  const phoneValue = phone.value;
+  if (!overlayValidation(nameValue, emailValue, phoneValue)) return;
+  let newContact = { name: nameValue, email: emailValue, phone: phoneValue };
   await putNewContactToDatabase(newContact);
   closeAddContactOverlay();
   clearContactForm();
   showSuccessMessage();
-  scrollToNewContact(newContact);
+  setTimeout(() => {
+    scrollToNewContact(newContact);
+  }, 100);
 };
 
 /**
@@ -270,36 +259,12 @@ const clearEditForm = () => {
 };
 
 /**
- * Adds a new contact to the Firebase Realtime Database for the current user.
- *
- * Sends a PUT request to the database, storing the provided contact object
- * under the path `/contacts/{currentUser.id}/{nextKey}.json` where nextKey is
- * the highest existing firebaseKey + 1, but skips 10000 (guest key).
- *
- * @async
- * @param {Object} contact - The contact object to be added to the database.
- * @returns {Promise<void>} A promise that resolves when the contact has been added.
- */
-const putNewContactToDatabase = async (contact) => {
-  const filteredKeys = firebaseKeys.filter((key) => key !== 10000);
-  let newKey = Math.max(...filteredKeys) + 1;
-  newKey === 10000 ? (newKey = 10001) : (newKey = newKey);
-  await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/contacts/${currentUser.id}/${newKey}.json`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(contact),
-  });
-  await showContacts();
-};
-
-/**
  * Saves the edited contact information to the Firebase database.
  *
  * This function retrieves the currently selected contact's name from the DOM,
  * finds the corresponding contact object, collects the edited values from the
- * input fields, and updates the contact in the database using a PUT request.
+ * input fields, validates that the name contains both first name and surname,
+ * and updates the contact in the database using a PUT request.
  * After saving, it closes the edit overlay, clears the edit form, and refreshes
  * the contact list display.
  *
@@ -310,61 +275,49 @@ const putNewContactToDatabase = async (contact) => {
 const saveEditedContactToDatabase = async () => {
   const contactName = document.querySelector(".contact-information-username").innerText;
   const contact = contacts.find((contact) => contact.name === contactName);
-  const editedContact = {
-    name: document.getElementById("editContactName").value,
-    email: document.getElementById("editContactEmail").value,
-    phone: document.getElementById("editContactPhone").value,
-  };
-  putEditedContactToDatabase(editedContact, contact);
+  const editedName = document.getElementById("editContactName").value.trim();
+  const editedEmail = document.getElementById("editContactEmail").value;
+  const editedPhone = document.getElementById("editContactPhone").value;
+  if (!overlayValidation(editedName, editedEmail, editedPhone)) return;
+  const editedContact = { name: editedName, email: editedEmail, phone: editedPhone };
+  await putEditedContactToDatabase(editedContact, contact);
   finishEdit();
 };
 
 /**
- * Updates an existing contact in the Firebase Realtime Database with the provided edited contact data.
- *
- * @async
- * @function
- * @param {Object} editedContact - The updated contact data to be saved in the database.
- * @param {Object} contact - The original contact object, containing at least the `firebaseKey` property.
- * @returns {Promise<void>} A promise that resolves when the contact has been updated in the database.
+ * Validates if a name contains exactly two words (first name and surname).
+ * @param {string} name - The name to validate.
+ * @returns {boolean} True if the name has exactly two words, false otherwise.
  */
-const putEditedContactToDatabase = async (editedContact, contact) => {
-  await fetch(
-    `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/contacts/${currentUser.id}/${contact.firebaseKey}.json`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(editedContact),
-    }
-  );
+const validateFullName = (name) => {
+  const trimmedName = name.trim();
+  const words = trimmedName.split(/\s+/);
+  return words.length === 2 && words.every((word) => word.length > 0);
 };
 
 /**
- * Deletes the currently selected contact from the Firebase database.
+ * Validates the input fields for editing a contact in the overlay.
  *
- * This function retrieves the contact name from the DOM, finds the corresponding contact object,
- * and sends a DELETE request to remove the contact from the database. After deletion, it clears
- * the contact details section in the UI and refreshes the contact list.
+ * @param {string} editedName - The edited name to validate (must be a full name)
+ * @param {string} editedEmail - The edited email address to validate
+ * @param {string} editedPhone - The edited phone number to validate
+ * @returns {boolean} Returns true if all validations pass, false otherwise
  *
- * @async
- * @function
- * @returns {Promise<void>} Resolves when the contact has been deleted and the UI updated.
+ * @description This function performs the following validations:
+ * - Checks if all required fields (name, email, phone) are provided
+ * - Validates that the name contains both first and last name using validateFullName()
+ * - Shows appropriate German error messages via alert() if validation fails
  */
-const deleteContactFromDatabase = async () => {
-  const contactName = document.querySelector(".contact-information-username").innerText;
-  const contact = contacts.find((contact) => contact.name === contactName);
-  await fetch(
-    `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/contacts/${currentUser.id}/${contact.firebaseKey}.json`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  finishEdit();
+const overlayValidation = (editedName, editedEmail, editedPhone) => {
+  if (!editedName || !editedEmail || !editedPhone) {
+    alert("Bitte fülle alle Felder aus.");
+    return false;
+  }
+  if (!validateFullName(editedName)) {
+    alert("Bitte gib Vor- und Nachname ein (z.B. 'Max Mustermann').");
+    return false;
+  }
+  return true;
 };
 
 /**
@@ -385,9 +338,11 @@ const finishEdit = () => {
 const scrollToNewContact = (newContact) => {
   const initials = newContact.name.split(" ")[0][0] + newContact.name.split(" ")[1][0];
   const contact = document.querySelector(`[data-contact="${newContact.name}"]`);
+  const contactData = contacts.find((c) => c.name === newContact.name);
+  const contactIconId = ((contactData.firebaseKey - 1) % 15) + 1;
   contact.scrollIntoView({
     behavior: "smooth",
     block: "center",
   });
-  showContactsDetails(initials, newContact.name, newContact.email, newContact.phone, contact);
+  showContactsDetails(initials, newContact.name, newContact.email, newContact.phone, contactIconId, contact);
 };
