@@ -16,7 +16,6 @@ let bordOverlay = document.getElementById("board-overlay");
 let subtaskValue = [];
 
 document.getElementById("create-task-button").onclick = function () {
-    if(document.getElementById("create-task-button").dataset.column) columnVal = document.getElementById("create-task-button").dataset.column;
     checkRequiredInput(columnVal, true);
 };
 

@@ -23,8 +23,9 @@ let allTickets = JSON.parse(getTickets);
 /**
  * function to open/close the addTask pop-up
  */
-function popUpAddTask(ele, columnVal) {
-    const isHidden = ele.classList.contains("hide");
+function popUpAddTask(ele,columnV) {
+  columnVal = columnV
+  const isHidden = ele.classList.contains("hide");
   if (
     document.getElementById("board-task-information").className === "hide" &&
     document.getElementById("board-task-edit").className === ""
@@ -44,8 +45,7 @@ function popUpAddTask(ele, columnVal) {
       ele.classList.add("hide");
       overlay.classList.add("hide");
     }, 200);
-  }  
-  document.getElementById("create-task-button").dataset.column = columnVal || "To do";
+  }
 }
 
 /**
@@ -251,11 +251,13 @@ async function saveChangedTicketInFirbase() {
         body: JSON.stringify(allTickets[currentDraggedElement]),
       }
     );
+    localStorage.setItem("tickets", JSON.stringify(allTickets));
+    getTicketData();
+    renderTickets();
   } catch (error) {
     console.error("Error saving ticket:", error);
   }
 }
-
 
 /**
  * Toggles the visibility of "no tasks" containers for each board column
@@ -729,7 +731,11 @@ async function deleteTicket(index) {
     );
     overlay.classList.add("hide");
     document.getElementById("board-task-pop-up").classList.add("hide");
-    getTicketData();
+    delete allTickets[index]; // entfernt das Ticket aus dem Objekt
+    allTickets = allTickets.filter((t) => t.id !== index);
+    localStorage.setItem("tickets", JSON.stringify(allTickets));
+
+    renderTickets();
   } catch (error) {
     console.error("Fehler beim Löschen des Tickets:", error);
   }
