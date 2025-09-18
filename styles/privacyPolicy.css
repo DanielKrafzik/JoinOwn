@@ -37,8 +37,3 @@ h2 {
   }
 }
 
-@media (min-width: 1920px) {
-  main {
-    margin-left: 0 !important;
-  }
-}

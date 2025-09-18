@@ -11,9 +11,12 @@ body {
   height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
   flex-direction: column;
   background-color: rgb(246, 247, 248);
+}
+
+#index-body {
+  align-items: center;
 }
 
 main {
@@ -95,5 +98,3 @@ main {
 .User-bc-15 {
   background-color: rgb(255, 187, 43);
 }
-
-/*

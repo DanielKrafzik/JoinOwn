@@ -2,6 +2,10 @@ html {
   overflow: hidden;
 }
 
+body{
+  align-items: flex-start;
+}
+
 h1 {
   font-size: 48px;
 }
@@ -14,6 +18,7 @@ h1 {
   padding-right: 100px;
   padding-top: 50px;
   margin-bottom: 50px;
+  margin-left: 232px;
 }
 
 .board-header-btns {
@@ -85,6 +90,7 @@ button {
   display: flex;
   gap: 20px;
   padding: 20px 100px;
+  margin-left: 232px;
 }
 
 .kanban-column {
@@ -244,7 +250,7 @@ button {
 }
 
 .pop-up-margin-b-25 {
-  width: 25vw;
+
   white-space: nowrap;   
   overflow: hidden;       
   text-overflow: ellipsis;
@@ -260,6 +266,9 @@ button {
   background-color: rgb(246, 247, 248);
 }
 
+#pop-up-task-description {
+  white-space: normal !important;
+}
 
 /* individual background-colors */
 
@@ -857,8 +866,12 @@ button {
   }
 }
 
-@media (min-width: 1920px) {
+@media (min-width: 2300px) {
   main {
     margin-left: 0 !important;
   }
+}
+
+#add-task-pop-up{
+  margin-left: 12.5%;
 }
