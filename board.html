@@ -35,8 +35,11 @@
             <img  src="./assets/imgs/search_lense.png" class="search-bar-lense" alt="search lense" />
           </button>
         </div>
-        <button class="board-add-task full-screen-button" onclick="popUpAddTask(popup, 'To do')">Add task +</button>
-        <a class="board-add-task mobile-button" id="board-add-task-a" href="./addTask.html">Add task +</a>
+        <button class="board-add-task full-screen-button" onclick="popUpAddTask(popup, 'To do')">
+          <p id="task-btn-mobile">Add task</p>
+          <p>+</p>
+        </button>
+        <a class="board-add-task mobile-button" id="board-add-task-a" href="./addTask.html">+</a>
       </div>
     </div>
 
@@ -94,13 +97,13 @@
     </div>
   </main>
 
-  <div id="board-overlay" class="overlay hide" data-target="add-task-pop-up" onclick="closeViaOverlay(this)"></div>
+  <div id="board-overlay" class="overlay hide" data-target="add-task-pop-up" onclick="closeViaOverlay(this); boardInit()"></div>
   <div id="board-overlay-transparent" class="overlay transparent hide" onclick="popUpAccNav()"></div>
 
-  <div class="hide slide-out" id="add-task-pop-up">
+  <div class="hide slide-out mw1920" id="add-task-pop-up">
     <div id="add-task-close-div">
       <h1>Add Task</h1>
-      <button id="board-add-task-close-button" onclick="popUpAddTask(popup)">X</button>
+      <button id="board-add-task-close-button" onclick="clearTask('render-selected-users-board', 'Select task category', 'category-button', 'drop-down-category-board', 'subtask-render-div'); popUpAddTask(popup)">X</button>
     </div>
     <div class="add-task-form">
       <div class="add-task-text-div">
@@ -124,7 +127,7 @@
         <p>Priority</p>
         <div class="add-task-importance-selection">
           <button class="priority-button" onclick="setPriority('urgent', this)">
-            Urgent<img src="./assets/icon/red-arrows.svg" alt="" />
+            Urgent <img src="./assets/icon/red-arrows.svg" alt="" />
           </button>
           <button class="priority-button medium" onclick="setPriority('medium', this)" id="medium-priority-button">
             Medium <img src="./assets/icon/orange-same.svg" alt="" />

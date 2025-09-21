@@ -1,10 +1,13 @@
 /**
  * function to open/close the addTask pop-up
  */
-function popUpAddTask(ele,columnV) {
-  columnVal = columnV
+function popUpAddTask(ele, columnV) {
+  columnVal = columnV;
   const isHidden = ele.classList.contains("hide");
-  if (document.getElementById("board-task-information").className === "hide" && document.getElementById("board-task-edit").className === "") {
+  if (
+    document.getElementById("board-task-information").className === "hide" &&
+    document.getElementById("board-task-edit").className === ""
+  ) {
     document.getElementById("board-task-information").classList.remove("hide");
     document.getElementById("board-task-edit").classList.add("hide");
   }
@@ -67,31 +70,32 @@ function switchEditInfoMenu(ele) {
  * @param {Array<Object>} tickets - An array of ticket objects to render. Each ticket should contain properties such as `title`, `description`, `category`, `column`, `assignedTo`, `priority`, and `subtask`.
  * @returns {Promise<void>} Resolves when all tickets have been rendered to the DOM.
  */
-async function renderTickets() {
+async function renderTickets(tickets = allTickets) {
   document.getElementById("to-do-div").innerHTML = "";
   document.getElementById("in-progress-div").innerHTML = "";
   document.getElementById("await-feedback-div").innerHTML = "";
-  document.getElementById("done-div").innerHTML = "";  
-  await renderAllTickets();
-  toggleNoTaskContainer();
+  document.getElementById("done-div").innerHTML = "";
+  await renderAllTickets(tickets);
+  toggleNoTaskContainer(tickets);
 }
 
 /**
  * Renders all tickets on the board.
  *
- * Iterates over all stored tickets, prepares their data using 
- * `getVariablesToRenderTickets`, and inserts the tickets into 
- * the corresponding column with `ticketTemplate`. Additionally, 
+ * Iterates over all stored tickets, prepares their data using
+ * `getVariablesToRenderTickets`, and inserts the tickets into
+ * the corresponding column with `ticketTemplate`. Additionally,
  * it calculates subtask counters and renders their progress.
  *
  * @async
  * @function renderAllTickets
+ * @param {Array<Object>} tickets - The tickets to render. Defaults to allTickets if not provided.
  * @returns {Promise<void>} - Returns nothing but updates the UI.
  */
-async function renderAllTickets() {
-  for (const [index, t] of Object.entries(allTickets)) {
+async function renderAllTickets(tickets = allTickets) {
+  for (const [index, t] of Object.entries(tickets)) {
     if (t) {
-      const { subtasks, columnId, title, description, category, categoryCss, assignedTo, priority, ticketCounterId } = getVariablesToRenderTickets(t);
+      const {subtasks, columnId, title, description, category, categoryCss, assignedTo, priority, ticketCounterId,} = getVariablesToRenderTickets(t);
       calculateSubtaskCounter(subtasks);
       document.getElementById(columnId).innerHTML += await ticketTemplate(title, description, category, categoryCss, assignedTo, priority, index, subtasks, ticketCounterId);
       renderSubtaskProgress(index, subtasks);
@@ -119,7 +123,7 @@ async function ticketTemplate(title, description, category, categoryCss, assigne
     assignedTo.map(async (user, i) => {
       let renderedUserBgIndex = await getUserDetails(user);
       let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
-      let initials = user.split(" ").map((n) => n[0]).join("").toUpperCase();
+      let initials = user?.split(" ").map((n) => n[0]).join("").toUpperCase();
       return `<span class="user-icon-rendered User-bc-${safeIndex}">${initials}</span>`;
     })
   );
@@ -145,14 +149,13 @@ function renderSubtaskProgress(index, subtasks) {
  * there are any tickets in each column. Uses the helper function
  * `checkTicketsForToggle` to show or hide the corresponding container.
  *
- * Assumes the existence of a global `allTickets` array and a
- * `checkTicketsForToggle` function.
+ * @param {Array<Object>} tickets - The tickets to check. Defaults to allTickets if not provided.
  */
-function toggleNoTaskContainer() {
-  let allTicketsToDo = allTickets.filter((obj) => obj.column == "To do");
-  let allTicketsProgress = allTickets.filter((obj) => obj.column == "In progress");
-  let allTicketsFeedback = allTickets.filter((obj) => obj.column == "Await feedback");
-  let allTicketsDone = allTickets.filter((obj) => obj.column == "done");
+function toggleNoTaskContainer(tickets = allTickets) {
+  let allTicketsToDo = tickets.filter((obj) => obj.column == "To do");
+  let allTicketsProgress = tickets.filter((obj) => obj.column == "In progress");
+  let allTicketsFeedback = tickets.filter((obj) => obj.column == "Await feedback");
+  let allTicketsDone = tickets.filter((obj) => obj.column == "done");
   checkTicketsForToggle(allTicketsToDo, "noTasksToDo");
   checkTicketsForToggle(allTicketsProgress, "noTasksProgress");
   checkTicketsForToggle(allTicketsFeedback, "noTasksFeedback");
@@ -240,8 +243,9 @@ async function renderTicketDetails(category, categoryColor, title, description, 
     })
   );
   let userSpans = userSpansArray.join("");
-  let subtaskEle = subtasks
-    .map((subtask, i) => {return getRenderTicketDetailsSubtaskEleTemplate(i, subtask, index, ticketCounterId);}).join("");
+  let subtaskEle = subtasks.map((subtask, i) => {
+      return getRenderTicketDetailsSubtaskEleTemplate(i, subtask, index, ticketCounterId);
+    }).join("");
   document.getElementById("board-task-information").innerHTML = getRenderTicketDetailsTemplate(category, categoryColor, title, description, date, priority, index, ticketCounterId, userSpans, subtaskEle);
 }
 
@@ -309,15 +313,11 @@ function minDate() {
  * @throws {Error} If any call to `getUserDetails(user)` fails.
  */
 async function editTicket(title, description, dateForEditOverlay, priority, assignedTo, subtasks, index, mode, ticketCounterId) {
-  let userSpansArray = await Promise.all(
-    iterateThroughUsersForVisualization(assignedTo)
-  );
+  let userSpansArray = await Promise.all(iterateThroughUsersForVisualization(assignedTo));
   let userSpans = userSpansArray.join("");
-  let subtaskEle = subtasks
-    .map((subtask, i) => {
+  let subtaskEle = subtasks.map((subtask, i) => {
       return getEditTicketSubtaskEleTemplate(subtask, i, dataTicketIndex, dataTicketCounterId, dataMode);
-    })
-    .join("");
+    }).join("");
   subtaskEditArray = [];
   subtasks.forEach((subtask) => subtaskEditArray.push(subtask.text));
   renderHTMLElementsForEditing(title, description, dateForEditOverlay, userSpans, subtaskEle, index, ticketCounterId, mode, priority);
@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const greeting = document.querySelector(".greeting");
     if (greeting) {
       greeting.addEventListener("animationend", () => {
-      greeting.style.display = "none"; 
+        greeting.style.display = "none";
       });
       sessionStorage.setItem("greetingShown", "true");
     }
