@@ -13,7 +13,6 @@ function popUpAddTask(ele, columnV) {
   }
   popUpAddTaskAnimation(ele, isHidden);
 }
-
 /**
  * Animates the display of a popup element for adding a task.
  *
@@ -35,7 +34,6 @@ function popUpAddTaskAnimation(ele, isHidden) {
     }, 200);
   }
 }
-
 /**
  * Handles closing a popup via its overlay element.
  * Retrieves the target popup element using the overlay's data-target attribute,
@@ -50,7 +48,6 @@ function closeViaOverlay(overlayElement) {
     popUpAddTask(popupElement);
   }
 }
-
 /**
  * Toggles the visibility of the task information and task edit sections on the board,
  * and renders the ticket overlay for the specified element.
@@ -62,23 +59,23 @@ function switchEditInfoMenu(ele) {
   document.getElementById("board-task-edit").classList.toggle("hide");
   renderTicketOverlay(ele);
 }
-
 /**
  * Renders a list of tickets into their respective board columns.
+ * Uses provided tickets or gets tickets from localStorage with key "tickets" if no parameter is provided.
  *
  * @async
- * @param {Array<Object>} tickets - An array of ticket objects to render. Each ticket should contain properties such as `title`, `description`, `category`, `column`, `assignedTo`, `priority`, and `subtask`.
+ * @param {Array<Object>} [tickets] - Optional array of ticket objects to render. If not provided, tickets are loaded from localStorage.
  * @returns {Promise<void>} Resolves when all tickets have been rendered to the DOM.
  */
-async function renderTickets(tickets = allTickets) {
+async function renderTickets(tickets) {
   document.getElementById("to-do-div").innerHTML = "";
   document.getElementById("in-progress-div").innerHTML = "";
   document.getElementById("await-feedback-div").innerHTML = "";
   document.getElementById("done-div").innerHTML = "";
-  await renderAllTickets(tickets);
-  toggleNoTaskContainer(tickets);
+  const ticketsToRender = tickets || JSON.parse(localStorage.getItem("tickets") || "[]");
+  await renderAllTickets(ticketsToRender);
+  toggleNoTaskContainer(ticketsToRender);
 }
-
 /**
  * Renders all tickets on the board.
  *
@@ -102,7 +99,6 @@ async function renderAllTickets(tickets = allTickets) {
     }
   }
 }
-
 /**
  * Generates an HTML snippet for a ticket , rendering assigned user icons concurrently.
  *
@@ -120,17 +116,20 @@ async function renderAllTickets(tickets = allTickets) {
  */
 async function ticketTemplate(title, description, category, categoryCss, assignedTo, priority, index, subtasks, ticketCounterId) {
   let userSpansArray = await Promise.all(
-    assignedTo.map(async (user, i) => {
+    assignedTo.slice(0, 5).map(async (user) => {
       let renderedUserBgIndex = await getUserDetails(user);
       let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
       let initials = user?.split(" ").map((n) => n[0]).join("").toUpperCase();
       return `<span class="user-icon-rendered User-bc-${safeIndex}">${initials}</span>`;
     })
   );
+  if (assignedTo.length > 5) {
+    let hiddenCount = assignedTo.length - 5;
+    userSpansArray.push(`<span class="user-icon-rendered User-bc-14" id="hidden-users">+${hiddenCount}</span>`);
+  }
   let userSpans = userSpansArray.join("");
   return getTicketTemplate(index, title, description, category, categoryCss, priority, subtasks, ticketCounterId, userSpans);
 }
-
 /**
  * Displays the subtask progress element for a given index if there is at least one subtask.
  *
@@ -142,7 +141,6 @@ function renderSubtaskProgress(index, subtasks) {
     document.getElementById(`p-subtask-${index}`).classList.remove("hide");
   }
 }
-
 /**
  * Toggles the visibility of "no tasks" containers for each board column
  * ("To do", "In progress", "Await feedback", "done") based on whether
@@ -161,7 +159,6 @@ function toggleNoTaskContainer(tickets = allTickets) {
   checkTicketsForToggle(allTicketsFeedback, "noTasksFeedback");
   checkTicketsForToggle(allTicketsDone, "noTasksDone");
 }
-
 /**
  * Asynchronously fetches ticket data and renders the ticket overlay for the selected element.
  *
@@ -184,7 +181,6 @@ async function renderTicketOverlay(ele) {
     console.log(error);
   }
 }
-
 /**
  * Renders the HTML elements required for editing a ticket.
  *
@@ -214,7 +210,6 @@ function renderHTMLElementsForEditing(title, description, dateForEditOverlay, us
     } else ele.classList.remove(ele.innerText.toLowerCase().trim());
   });
 }
-
 /**
  * Builds and returns an array of HTML snippets representing assigned users for a ticket detail view.
  * Each user is rendered with an icon (initials) styled dynamically based on user-specific details.
@@ -248,7 +243,6 @@ async function renderTicketDetails(category, categoryColor, title, description, 
     }).join("");
   document.getElementById("board-task-information").innerHTML = getRenderTicketDetailsTemplate(category, categoryColor, title, description, date, priority, index, ticketCounterId, userSpans, subtaskEle);
 }
-
 /**
  * Removes a subtask from the editable subtask array and updates the UI.
  *
@@ -268,7 +262,6 @@ async function spliceEditSubArray(ele) {
     renderTicketOverlay(ele);
   }
 }
-
 /**
  * Toggles the checked state of a subtask for a given ticket and saves the update to Firebase.
  *
@@ -286,7 +279,6 @@ function toggleSubtask(input) {
   };
   saveEditedTaskToFirebase(input, ticketIndex, partialUpdate, ticketCounterIndex);
 }
-
 /**
  * Sets the minimum selectable date for the input element with the ID "task-date".
  * The minimum date is specified by the variable `today`, which should be defined elsewhere in the code.
@@ -295,7 +287,6 @@ function minDate() {
   const dateInput = document.getElementById("task-date");
   dateInput.setAttribute("min", today);
 }
-
 /**
  * Generates an array of HTML `<span>` snippets representing users assigned to a ticket in edit mode.
  * Fetches user-specific styling information concurrently and renders each user's initials with styling.
@@ -313,7 +304,7 @@ function minDate() {
  * @throws {Error} If any call to `getUserDetails(user)` fails.
  */
 async function editTicket(title, description, dateForEditOverlay, priority, assignedTo, subtasks, index, mode, ticketCounterId) {
-  let userSpansArray = await Promise.all(iterateThroughUsersForVisualization(assignedTo));
+  let userSpansArray = await iterateThroughUsersForVisualization(assignedTo);
   let userSpans = userSpansArray.join("");
   let subtaskEle = subtasks.map((subtask, i) => {
       return getEditTicketSubtaskEleTemplate(subtask, i, dataTicketIndex, dataTicketCounterId, dataMode);
@@ -322,7 +313,6 @@ async function editTicket(title, description, dateForEditOverlay, priority, assi
   subtasks.forEach((subtask) => subtaskEditArray.push(subtask.text));
   renderHTMLElementsForEditing(title, description, dateForEditOverlay, userSpans, subtaskEle, index, ticketCounterId, mode, priority);
 }
-
 /**
  * Iterates through the assigned users and generates visualization elements.
  *
@@ -337,15 +327,34 @@ async function editTicket(title, description, dateForEditOverlay, priority, assi
  * @returns {Promise<HTMLElement[]>} A promise that resolves to an array of
  *                                   rendered user span elements for visualization.
  */
-function iterateThroughUsersForVisualization(assignedTo) {
-  return assignedTo.map(async (user, i) => {
-    let renderedUserBgIndex = await getUserDetails(user);
-    let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
-    let initials = user.split(" ").map((n) => n[0]).join("").toUpperCase();
-    return getEditTicketUserSpansArrayTemplate(user, safeIndex, initials);
-  });
+async function iterateThroughUsersForVisualization(assignedTo) {
+  let userSpansArray = await createUserIcons(assignedTo);
+  if (assignedTo.length > 5) {
+    let hiddenCount = assignedTo.length - 5;
+    userSpansArray.push(`
+      <span class="user-icon-rendered User-bc-14" id="hidden-users">+${hiddenCount}</span>
+    `);
+  }
+  return userSpansArray;
 }
-
+/**
+ * Generates an array of user icon HTML templates for up to 5 assigned users.
+ * Each icon displays the user's initials and a background color index.
+ *
+ * @async
+ * @param {string[]} assignedTo - Array of user names assigned to a ticket.
+ * @returns {Promise<string[]>} Promise resolving to an array of HTML strings representing user icons.
+ */
+async function createUserIcons(assignedTo) {
+  return await Promise.all(
+    assignedTo.slice(0, 5).map(async (user) => {
+      let renderedUserBgIndex = await getUserDetails(user);
+      let safeIndex = ((renderedUserBgIndex - 1) % 15) + 1;
+      let initials = user.split(" ").map((n) => n[0]).join("").toUpperCase();
+      return getEditTicketUserSpansArrayTemplate(user, safeIndex, initials);
+    })
+  );
+}
 /**
  * Moves the currently dragged ticket to the specified category (column).
  *
@@ -367,7 +376,6 @@ function setGlobalEditInformation(ele) {
   dataTicketCounterId = ele.dataset.ticketcounterid;
   dataMode = ele.dataset.mode;
 }
-
 /**
  * Retrieves the value of the "greetingShown" flag from sessionStorage.
  * Indicates whether the greeting has already been displayed in the current session.
