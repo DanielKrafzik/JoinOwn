@@ -166,6 +166,8 @@ main {
   justify-content: start;
   width: 360px;
   margin-top: 8px;
+  height: 15px;
+  align-items: flex-start;
 }
 
 .wrongPasswordText {
@@ -222,12 +224,16 @@ main {
 
 .wrong-password-div {
   width: 360px;
+  height: 15px;
+  display: flex;
+  align-items: flex-start;
 }
 
 .wrong-password-info {
   color: rgb(255, 64, 87);
   font-size: 12px;
   margin-top: 5px;
+  line-height: 1.2;
 }
 
 input:-webkit-autofill {
@@ -249,7 +255,7 @@ input:-webkit-autofill {
   transform: translate(-50%, -50%) scale(1);
   animation: slide-out-tl 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   animation-delay: 1s;
-  z-index: 50;
+  z-index: 5;
 }
 
 @keyframes slide-out-tl {
@@ -269,8 +275,6 @@ input:-webkit-autofill {
   }
 }
 
-/* userfeedback*/
-
 #signup-overlay {
   position: fixed;
   inset: 0;
@@ -278,7 +282,7 @@ input:-webkit-autofill {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 110;
+  z-index: 11;
 }
 
 #signup-message {
@@ -292,8 +296,8 @@ input:-webkit-autofill {
 #btn-sign-up:disabled,
 #btn-login-div .grey-btn:disabled {
   background-color: #aaa;
-  cursor: not-allowed;     
-  opacity: 0.6;             
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 @keyframes slideMessage {
@@ -336,27 +340,33 @@ input:-webkit-autofill {
   #btn-login-div-sign-up {
     margin: 18px 0;
   }
-
-  main {
-    padding-right: 20px !important;
-  }
 }
 
-@media (min-width: 2020px){
+@media (min-width: 2020px) {
   @keyframes slide-out-tl {
-  0% {
-    top: 50%;
-    left: 50%;
-    width: 300px;
-    height: 366px;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  100% {
-    top: 80px;
-    left: calc((100vw - 1820px) / 2);
-    width: 80px;
-    height: 100px;
-    transform: translate(0, 0) scale(1);
+    0% {
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 366px;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+      top: 80px;
+      left: calc((100vw - 1820px) / 2);
+      width: 80px;
+      height: 100px;
+      transform: translate(0, 0) scale(1);
+    }
   }
 }
+
+@media (max-width: 400px) {
+  #checkbox-divider-sign-up {
+    font-size: 14px;
+  }
+
+  .wrong-password-info {
+    font-size: 11px;
+  }
 }

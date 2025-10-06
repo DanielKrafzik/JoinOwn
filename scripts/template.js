@@ -14,9 +14,9 @@ function userDropDownTemplate(name, inititals, index, id, isSelected, classCheck
         <span class="user-icon User-bc-${index}" data-bcIndex="${index}">${inititals}</span>
         <p>${name}</p>
       </div>
-      <input type="checkbox" class="user-checkbox-${classChecker ? 'add' : 'edit'}" value="${name}" ${
-    isSelected ? "checked" : ""
-  } onclick="renderSelectedUsers('${id}', '${classChecker  ?  'user-checkbox-add' : 'user-checkbox-edit'}')">
+      <input type="checkbox" class="user-checkbox-${classChecker ? "add" : "edit"}" value="${name}" ${isSelected ? "checked" : ""} onclick="renderSelectedUsers('${id}', '${
+    classChecker ? "user-checkbox-add" : "user-checkbox-edit"
+  }')">
 </label>
   `;
 }
@@ -40,6 +40,7 @@ const getTicketTemplate = (index, title, description, category, categoryCss, pri
     <div
       draggable="true"
       ondragstart="startDragging(${index})"
+      ondragend="endDragging()"
       class="kanban-task"
       data-ticketIndex="${index}"
       data-ticketcounterid="${ticketCounterId}"
@@ -56,16 +57,14 @@ const getTicketTemplate = (index, title, description, category, categoryCss, pri
       <h4 class="content-limitation">${title}</h4>
       <p class="content-limitation">${description}</p>
       <div id="p-subtask-${index}" class="subtask-progress-div hide">
-        <div class="subtask-progress-grey-div ${checkedSubtask ? '' : 'hide'}">
+        <div class="subtask-progress-grey-div ${checkedSubtask ? "" : "hide"}">
           <div class="subtask-progress-blue-div" style="width: ${subtaskWidth}%"></div>
         </div>
-        <p class="subtask-count ${checkedSubtask ? '' : 'hide'}">${subtaskCount}/${subtasks.length} Subtasks</p>
+        <p class="subtask-count ${checkedSubtask ? "" : "hide"}">${subtaskCount}/${subtasks.length} Subtasks</p>
       </div>
       <div class="assigned-users">
         <div>${userSpans}</div>
-        <img src="${
-          priority[0] && priority !== "-" ? `./assets/icon/${priority}.svg` : ""
-        }" alt="" />
+        <img src="${priority[0] && priority !== "-" ? `../assets/icon/${priority}.svg` : ""}" alt="" />
       </div>
     </div>
   `;
@@ -118,7 +117,7 @@ function getContactTemplate(initials, userName, email, phone, contactIconId) {
  */
 function getContactDetailsTemplate(initials, userName, email, phone, contactIconId) {
   return /*html*/ `
-    <img src="./assets/icon/arrow-left-line.svg" alt="" id="leave-contact-details-btn" onclick="hideContactDetails()"  class="hide">
+    <img src="../assets/icon/arrow-left-line.svg" alt="" id="leave-contact-details-btn" onclick="hideContactDetails()"  class="hide">
     <div class="contact-information-mt">
       <div class="initials-and-username">
         <span class="contact-information-initials User-bc-${contactIconId}">${initials}</span>
@@ -126,11 +125,11 @@ function getContactDetailsTemplate(initials, userName, email, phone, contactIcon
           <div class="contact-information-username">${userName}</div>
           <div class="edit-and-delete">
             <div onclick="openEditOverlayWithBubblingPrevention(event, '${initials}', '${userName}', '${email}', '${phone}', '${contactIconId}')" class="align-icon-and-text">
-              <img class="edit-delete-icons" src="./assets/icon/edit_contact.svg" alt="">
+              <img class="edit-delete-icons" src="../assets/icon/edit_contact.svg" alt="">
               <span>Edit</span>
             </div>
             <div onclick="deleteContactFromDatabase()" class="align-icon-and-text">
-              <img class="edit-delete-icons" src="./assets/icon/delete_contact.svg" alt="">
+              <img class="edit-delete-icons" src="../assets/icon/delete_contact.svg" alt="">
               <span>Delete</span>
             </div>
           </div>
@@ -158,11 +157,11 @@ function getContactDetailsTemplate(initials, userName, email, phone, contactIcon
  */
 function getEditOverlayContentTemplate(initials, userName, email, phone, contactIconId) {
   return /*html*/ `
-  <img class="close-icon" src="./assets/icon/close.svg" alt="" onclick="closeEditOverlay()" />
+  <img class="close-icon" src="../assets/icon/close.svg" alt="" onclick="closeEditOverlay()" />
     <div class="contact-overlay-header">
-        <img class="join-logo-img" src="./assets/imgs/join_navigation.png" alt="" />
+        <img class="join-logo-img" src="../assets/imgs/join_navigation.png" alt="" />
         <h1>Edit contact</h1>
-        <img class="add-contact-overlay-line" src="./assets/icon/add_contact_overlay_line.svg" alt="" />
+        <img class="add-contact-overlay-line" src="../assets/icon/add_contact_overlay_line.svg" alt="" />
       </div>
       <div class="contact-inputs-container">
         <div class="edit-overlay-initials User-bc-${contactIconId}">${initials}</div>
@@ -177,7 +176,7 @@ function getEditOverlayContentTemplate(initials, userName, email, phone, contact
               value="${userName}"
               required
             />
-            <img src="./assets/icon/user_grey.svg" alt="" class="icon" />
+            <img src="../assets/icon/user_grey.svg" alt="" class="icon" />
           </div>
           <p id="name-error-msg-edit" class="contact-error hide">Please enter a valid Name.</p>
           <div>
@@ -190,7 +189,7 @@ function getEditOverlayContentTemplate(initials, userName, email, phone, contact
               value="${email}"
               required
             />
-            <img src="./assets/icon/mail-icon-grey.svg" alt="" class="icon" />
+            <img src="../assets/icon/mail-icon-grey.svg" alt="" class="icon" />
           </div>
           <p id="email-error-msg-edit" class="contact-error hide">Please enter a valid Email.</p>
           <div>
@@ -203,7 +202,7 @@ function getEditOverlayContentTemplate(initials, userName, email, phone, contact
               value="${phone}"
               required
             />
-            <img src="./assets/icon/call-grey.svg" alt="" class="icon" />
+            <img src="../assets/icon/call-grey.svg" alt="" class="icon" />
           </div>
           <p id="phone-error-msg-edit" class="contact-error hide">Please enter a valid Phone number.</p>
           <div class="contact-inputs-buttons">
@@ -226,11 +225,7 @@ function getEditOverlayContentTemplate(initials, userName, email, phone, contact
  */
 const getRenderTicketDetailsSubtaskEleTemplate = (i, subtask, index, ticketCounterId) => {
   return /*html*/ `
-    <li><input data-index="${i}" ${
-    subtask.checked ? "checked" : ""
-  } data-ticketindex="${index}" data-ticketcounterid="${ticketCounterId}" type="checkbox" onclick="toggleSubtask(this)">${
-    subtask.text
-  }</li>
+    <li><input data-index="${i}" ${subtask.checked ? "checked" : ""} data-ticketindex="${index}" data-ticketcounterid="${ticketCounterId}" type="checkbox" onclick="toggleSubtask(this)">${subtask.text}</li>
   `;
 };
 
@@ -270,7 +265,7 @@ const getRenderTicketDetailsTemplate = (category, categoryColor, title, descript
   return /*html*/ `
     <div id="task-pop-up-nav">
       <p class="${categoryColor}">${category}</p>
-      <button  onclick="popUpAddTask(popuptask); boardInit()">X</button>
+      <button  onclick="popUpAddTask(popuptask)">X</button>
     </div>
     <h1 class="pop-up-margin-b-25">${title}</h1>
     <p class="pop-up-margin-b-25" id="pop-up-task-description">${description}</p>
@@ -280,9 +275,7 @@ const getRenderTicketDetailsTemplate = (category, categoryColor, title, descript
     </div>
     <div class="pop-up-margin-b-25 gap-10">
       <p>Priority:</p>
-      <span>${priority.charAt(0).toUpperCase() + priority.slice(1)} <img src="${
-    priority && priority !== "-" ? `./assets/icon/${priority}.svg` : ""
-  }" alt=""></span>
+      <span>${priority.charAt(0).toUpperCase() + priority.slice(1)} <img src="${priority && priority !== "-" ? `../assets/icon/${priority}.svg` : ""}" alt=""></span>
     </div>
     <div class="pop-up-margin-b-25" id="assigned-users-div">
        ${userSpans}
@@ -292,10 +285,22 @@ const getRenderTicketDetailsTemplate = (category, categoryColor, title, descript
       <ul>${subtaskEle}</ul>
     </div>
     <div id="pop-up-bottom-buttons">
-      <button onclick="deleteTicket(${ticketCounterId})"><img src="./assets/icon/bin.svg" alt="">Delete</button>
-      <button data-ticketIndex=${index} data-ticketcounterid="${ticketCounterId}" data-mode="edit" onclick="switchEditInfoMenu(this); setGlobalEditInformation(this)"><img src="./assets/icon/pencil.svg" alt="">Edit</button>
+      <button onclick="deleteTicket(${ticketCounterId})"><img src="../assets/icon/bin.svg" alt="">Delete</button>
+      <button data-ticketIndex=${index} data-ticketcounterid="${ticketCounterId}" data-mode="edit" onclick="switchEditInfoMenu(this); setGlobalEditInformation(this)"><img src="../assets/icon/pencil.svg" alt="">Edit</button>
     </div>`;
 };
+
+/**
+ * Generates an HTML template string for a mobile navigation button.
+ *
+ * @param {string} direction - The direction of the button ("Up" or "Down").
+ * @param {number} index - The index of the ticket.
+ * @param {string} targetColumn - The target column to move to.
+ * @returns {string} The HTML string for the mobile navigation button.
+ */
+function getMobileNavigationButtonTemplate(direction, index, targetColumn) {
+  return /*html*/ `<button class="mobile-hide" data-ticketIndex="${index}" onclick="mobileMoveTo(this, event, '${targetColumn}')">${direction}</button>`;
+}
 
 /**
  * Generates an HTML template string for rendering task statistics on the dashboard.
@@ -319,7 +324,7 @@ const getRenderTicketDetailsTemplate = (category, categoryColor, title, descript
 function getRenderTasksTemplate() {
   return /*html*/ `
              <div onclick="goToBoardHtml()" class="toDo-and-done">
-              <div class="to-do">
+              <div class="to-do task-card-base flex-center">
                 <a href="">
                   <svg xmlns="http://www.w3.org/2000/svg" width="69" height="70" viewBox="0 0 69 70" fill="none">
                     <circle class="change-circle-color" cx="34.5" cy="35" r="34.5" fill="#2A3647" />
@@ -343,12 +348,12 @@ function getRenderTasksTemplate() {
                     </g>
                   </svg>
                 </a>
-                <div class="center">
+                <div class="center flex-column flex-center">
                   <h3>${toDos}</h3>
                   <p>To-do</p>
                 </div>
               </div>
-              <div onclick="goToBoardHtml()" class="done">
+              <div onclick="goToBoardHtml()" class="done task-card-base flex-center">
                 <a href="">
                   <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
                     <circle class="change-circle-color" cx="35" cy="35" r="34.5" fill="#2A3647" />
@@ -362,42 +367,42 @@ function getRenderTasksTemplate() {
                     />
                   </svg>
                 </a>
-                <div  class="center">
+                <div class="center flex-column flex-center">
                   <h3>${done}</h3>
                   <p>Done</p>
                 </div>
               </div>
             </div>
-            <div onclick="goToBoardHtml()" class="urgent-and-date">
-              <div class="urgent">
-                <a href=""><img class="urgent-icon-responsiv" src="./assets/icon/urgent-orange-icon.svg" alt="" /></a>
+            <div onclick="goToBoardHtml()" class="urgent-and-date task-card-base flex-center">
+              <div class="urgent flex-center">
+                <a href=""><img class="urgent-icon-responsiv" src="../assets/icon/urgent-orange-icon.svg" alt="" /></a>
                 <div>
                   <h3>${urgentTickets}</h3>
                   <p>Urgent</p>
                 </div>
               </div>
-              <img class="mobile-padding" src="./assets/icon/hyphen.svg" alt="" />
+              <img class="mobile-padding" src="../assets/icon/hyphen.svg" alt="" />
               <div class="deadline">
                 <h4>${deadline}</h4>
                 <p>Upcoming Deadline</p>
               </div>
             </div>
             <div onclick="goToBoardHtml()" class="tasks-in-editing">
-              <div class="tasks-in-board">
+              <div class="tasks-in-board task-card-base flex-center flex-column">
                 <h3>${currentTickets.length}</h3>
                 <p>
                   Tasks in <br />
                   Board
                 </p>
               </div>
-              <div onclick="goToBoardHtml()" class="tasks-in-progress">
+              <div onclick="goToBoardHtml()" class="tasks-in-progress task-card-base flex-center flex-column">
                 <h3>${inProgress}</h3>
                 <p>
                   Tasks in <br />
                   Progress
                 </p>
               </div>
-              <div onclick="goToBoardHtml()" class="awaiting-feedback">
+              <div onclick="goToBoardHtml()" class="awaiting-feedback task-card-base flex-center flex-column">
                 <h3>${awaitFeedback}</h3>
                 <p>
                   Awaiting <br />

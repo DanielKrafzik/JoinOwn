@@ -1,7 +1,6 @@
 const popup = document.getElementById("add-task-pop-up");
 const popuptask = document.getElementById("board-task-pop-up");
 const overlay = document.getElementById("board-overlay");
-let currentDraggedElement;
 const currentDate = new Date();
 const year = currentDate.getFullYear();
 const month = currentDate.getMonth() + 1;
@@ -46,29 +45,18 @@ let allTickets = JSON.parse(getTickets);
  * @returns {string[]} return.priority - Ticket priority.
  * @returns {string|number} return.ticketCounterId - Unique ticket ID.
  */
-function getVariablesToRenderTickets(t) {
-  const columnId = `${t.column.replace(" ", "-").toLowerCase()}-div`;
-  let columnValue = t.column;
-  let description = t.description || "";
-  let title = t.title;
-  let category = t.category;
-  let categoryCss = t.category.replace(" ", "-").toLowerCase();
-  let assignedTo = t.assignedTo || [];
-  let priority = t.priority || [];
-  let subtasks = t.subtask || [];
-  let ticketCounterId = t.id;
-  return {subtasks, columnId, title, description, category, categoryCss, assignedTo, priority, ticketCounterId, columnValue};
-}
-
-/**
- * Initiates the dragging process for a task at the specified index.
- * Sets the current dragged element and toggles the visibility of the "no task" container.
- *
- * @param {number} index - The index of the task to start dragging.
- */
-function startDragging(index) {
-  currentDraggedElement = index;
-  toggleNoTaskContainer();
+function getVariablesToRenderTickets(ticket) {
+  const columnId = `${ticket.column.replace(" ", "-").toLowerCase()}-div`;
+  let columnValue = ticket.column;
+  let description = ticket.description || "";
+  let title = ticket.title;
+  let category = ticket.category;
+  let categoryCss = ticket.category.replace(" ", "-").toLowerCase();
+  let assignedTo = ticket.assignedTo || [];
+  let priority = ticket.priority || [];
+  let subtasks = ticket.subtask || [];
+  let ticketCounterId = ticket.id;
+  return { subtasks, columnId, title, description, category, categoryCss, assignedTo, priority, ticketCounterId, columnValue };
 }
 
 /**
@@ -87,47 +75,6 @@ function calculateSubtaskCounter(subtasks) {
       }
     });
     subtaskWidth = (subtaskCount / subtasks.length) * 100;
-  }
-}
-
-/**
- * Enables an element to accept drop events by preventing the default handling of the dragover event.
- *
- * @param {DragEvent} ev - The drag event object.
- */
-function allowDrop(ev) {
-  ev.preventDefault();
-}
-
-/**
- * Saves the currently modified ticket to Firebase.
- *
- * Updates the corresponding ticket entry in the Firebase Realtime Database
- * using a PUT request. After saving, the updated tickets are also stored in
- * localStorage, and the UI is refreshed by calling `getTicketData()` and
- * `renderTickets()`.
- *
- * @async
- * @function saveChangedTicketInFirbase
- * @returns {Promise<void>} - Returns nothing but updates the database,
- *                            local storage, and re-renders the UI.
- */
-async function saveChangedTicketInFirbase() {
-  try {
-    await fetch(
-      `https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${allTickets[currentDraggedElement].id}.json`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(allTickets[currentDraggedElement]),
-      }
-    );
-    await getTicketData();
-    allTickets = JSON.parse(localStorage.getItem("tickets"));
-  } catch (error) {
-    console.error("Error saving ticket:", error);
   }
 }
 
