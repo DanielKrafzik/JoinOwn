@@ -158,7 +158,7 @@ async function saveUserToFirebase(userData) {
     const response = await fetch(BASE_URL_USERS);
     const contacts = await response.json();
     const newId = Object.keys(contacts || {}).length;
-    await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/users/${newId}.json`, {
+    await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/users/${newId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...userData, id: newId }),

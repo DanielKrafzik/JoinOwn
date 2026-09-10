@@ -49,7 +49,7 @@ async function changeDropDownArrow(id) {
  */
 async function createNewTicket(columnValue, className) {
   let selectedUsers = getSelectedUsers(className);
-  let counterResponse = await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticketCounter.json`);
+  let counterResponse = await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticketCounter.json`);
   let ticketCounter = await counterResponse.json();
   if (ticketCounter === null) {
     ticketCounter = 0;
@@ -273,7 +273,7 @@ async function saveTaskToFirebase(ticketData, ticketCounter) {
  * @returns {Promise<void>} A promise that resolves when the ticket data has been saved.
  */
 async function saveTicketData(ticketData, ticketCounter) {
-  await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounter}.json`, {
+  await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounter}.json`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -311,7 +311,7 @@ async function saveTaskToFirebasePassalong() {
  * @returns {Promise<void>} A promise that resolves when the update is complete.
  */
 async function updateTicketCounter(ticketCounter) {
-  await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticketCounter.json`, {
+  await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticketCounter.json`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

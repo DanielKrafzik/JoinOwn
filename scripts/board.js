@@ -224,7 +224,7 @@ function checkNewEditedValues(titleEdit, editedTicket, descriptionEdit, dateEdit
  */
 async function saveEditedTaskToFirebase(ele, index, ticketData, ticketCounterId) {
   try {
-    let response = await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`);
+    let response = await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`);
     let updatedTicket = await updateTicketParameters(response, ticketData);
     await putEditedTaskToFirebase(ticketCounterId, updatedTicket);
     renderTicketOverlay(ele);
@@ -248,7 +248,7 @@ async function saveEditedTaskToFirebase(ele, index, ticketData, ticketCounterId)
  * @returns {Promise<void>} - Resolves when the ticket has been successfully updated.
  */
 async function putEditedTaskToFirebase(ticketCounterId, updatedTicket) {
-  await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`, {
+  await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${ticketCounterId}.json`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -303,7 +303,7 @@ function addNewSubtask() {
  */
 async function deleteTicket(index) {
   try {
-    await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${index}.json`, {
+    await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${index}.json`, {
       method: "DELETE",
     });
     updateUIAfterDelete(index);

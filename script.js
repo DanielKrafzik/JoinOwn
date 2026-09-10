@@ -1,7 +1,7 @@
-const BASE_URL = "https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/";
-const BASE_URL_USERS = "https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/users.json";
-const BASE_URL_TICKETS = "https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets.json";
-const BASE_URL_CONTACTS = "https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/contacts.json";
+const BASE_URL = "https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/";
+const BASE_URL_USERS = "https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/users.json";
+const BASE_URL_TICKETS = "https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets.json";
+const BASE_URL_CONTACTS = "https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/contacts.json";
 let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser")) || {
   username: "",
   initals: "",
@@ -147,7 +147,7 @@ async function getTicketData() {
  */
 async function getContactsData(user) {
   try {
-    let response = await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/contacts/${user.id}.json`);
+    let response = await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/contacts/${user.id}.json`);
     let responseJson = await response.json();
     let contacts = Object.entries(responseJson || {})
       .filter(([, contact]) => contact !== null)

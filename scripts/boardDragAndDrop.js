@@ -82,7 +82,7 @@ async function saveChangedTicketInFirbase(newIndex) {
  *                          stored in localStorage, and the board has been re-initialized.
  */
 async function fetchChangedTicket(newIndex) {
-  await fetch(`https://join-3193b-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${allTickets[newIndex].id}.json`, {
+  await fetch(`https://join-new-38983-default-rtdb.europe-west1.firebasedatabase.app/tickets/ticket/${allTickets[newIndex].id}.json`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
