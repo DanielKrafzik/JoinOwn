@@ -1,3 +1,22 @@
 main {
     background-color: rgba(42, 54, 71, 1);
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    background-color: white;
+    width: 60%;
+    height: 403px;
+    padding: 56px 72px;
 }
