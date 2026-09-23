@@ -99,7 +99,7 @@ const showContactsDetails = (initials, userName, email, phone, contactIconId, cl
  * @returns {string} The escaped string.
  */
 const escapeQuotes = (str) => {
-  return str.replace(/'/g, "\\'");
+  return String(str).replace(/'/g, "\\'");
 };
 
 /**
