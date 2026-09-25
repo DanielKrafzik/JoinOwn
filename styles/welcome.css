@@ -20,3 +20,12 @@ main {
     height: 403px;
     padding: 56px 72px;
 }
+
+.welcome-divider {
+    display: flex;
+    justify-self: center;
+    width: 120px;
+    height: 3px;
+    background-color: rgba(23, 125, 168, 1);
+    margin-top: 16px;
+}
